@@ -1,22 +1,24 @@
 defmodule MarleySpoonRecipe.Recipe do
 
-  def get_all_entries() do
-    url = "#{base_url()}/spaces/#{space_id()}/environments/#{environment()}/entries?#{tail_url()}"
+  def get_all_recipes() do
+    "#{base_url()}/spaces/#{space_id()}/environments/#{environment()}/entries?#{tail_url()}"
+    |> http_request
+    |> Map.get("items")
+    |> Enum.filter(fn item -> get_in(item, ["sys", "contentType", "sys", "id"]) == "recipe" end)
+    |> get_recipe_list_tuple
+  end
 
-    case HTTPoison.get(url) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        recipes =
-          body
-          |> Jason.decode!
-          |> Map.get("items")
-          |> Enum.filter(fn item -> get_in(item, ["sys", "contentType", "sys", "id"]) == "recipe" end)
+  def get_recipe_list_tuple(recipes) do
+    # Returns "id" of all recipes
+    ids = Enum.map(recipes, fn res -> get_in(res, ["sys","id"]) end)
 
-        IO.inspect recipes
-      {:ok, %HTTPoison.Response{status_code: 404}} ->
-        IO.puts "Not found :("
-      {:error, %HTTPoison.Error{reason: reason}} ->
-        IO.inspect reason
-    end
+    # Returns "title" of all recipes
+    titles = Enum.map(recipes, fn res -> get_in(res, ["fields","title"]) end)
+
+    # fetches image of all recipes concurrently
+    images = get_recipes_image(recipes)
+
+    Enum.zip(titles, images) |> Enum.zip(ids)
   end
 
   def get_recipe_detail(id) do
@@ -34,7 +36,6 @@ defmodule MarleySpoonRecipe.Recipe do
     "#{base_url()}/spaces/#{space_id()}/environments/#{environment()}/assets/#{id}?#{tail_url()}"
     |> http_request
   end
-
 
   # Private
   defp get_nested_data(recipe) do
@@ -77,6 +78,13 @@ defmodule MarleySpoonRecipe.Recipe do
   defp get_record_by_link_type(linkType) when is_nil(linkType), do: linkType
 
   defp get_record_by_link_type(linkType) when is_binary(linkType), do: linkType
+
+  defp get_recipes_image(recipes) do
+    Enum.map(recipes, fn res -> get_in(res, ["fields","photo","sys","id"]) end)
+        |> Enum.map(fn(lt) -> Task.async(fn -> MarleySpoonRecipe.Recipe.link_type("Asset", lt) end) end)
+        |> Enum.map(&Task.await/1)
+        |> Enum.map(fn photo -> get_in(photo, ["fields", "file", "url"]) end)
+  end
 
   defp base_url(), do: "https://cdn.contentful.com"
   defp tail_url(), do: "access_token=7ac531648a1b5e1dab6c18b0979f822a5aad0fe5f1109829b8a197eb2be4b84c"

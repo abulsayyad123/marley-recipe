@@ -4,18 +4,8 @@ defmodule MarleySpoonRecipeWeb.RecipesLive do
   alias MarleySpoonRecipeWeb.RecipeDetailLive
 
   def mount(_params, _session, socket) do
-    recipes = Recipe.get_all_entries()
-
-    ids = Enum.map(recipes, fn res -> get_in(res, ["sys","id"]) end)
-    titles = Enum.map(recipes, fn res -> get_in(res, ["fields","title"]) end)
-    images = Enum.map(recipes, fn res -> get_in(res, ["fields","photo","sys","id"]) end)
-        |> Enum.map(fn(lt) -> Task.async(fn -> MarleySpoonRecipe.Recipe.link_type("Asset", lt) end) end)
-        |> Enum.map(&Task.await/1)
-        |> Enum.map(fn photo -> get_in(photo, ["fields", "file", "url"]) end)
-
-    tuple = Enum.zip(titles, images) |> Enum.zip(ids)
-    socket = assign(socket, recipes: recipes, tuple: tuple)
-    {:ok, socket}
+    recipes = Recipe.get_all_recipes()
+    {:ok, assign(socket, recipes: recipes)}
   end
 
   def render(assigns) do
@@ -35,7 +25,7 @@ defmodule MarleySpoonRecipeWeb.RecipesLive do
         </thead>
 
         <tbody>
-          <%= for {{title, image}, id} <- @tuple do %>
+          <%= for {{title, image}, id} <- @recipes do %>
             <tr>
               <td><%= title %></td>
               <td><img src={image} /></td>
