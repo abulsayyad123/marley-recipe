@@ -25,12 +25,12 @@ defmodule MarleySpoonRecipeWeb.RecipesLive do
         </thead>
 
         <tbody>
-          <%= for {{title, image}, id} <- @recipes do %>
+          <%= for recipe <- @recipes do %>
             <tr>
-              <td><%= title %></td>
-              <td><img src={image} /></td>
+              <td><%= recipe.title %></td>
+              <td><img src={recipe.photo} /></td>
               <td>
-                <%= live_patch to: Routes.live_path(@socket, RecipeDetailLive, id) do %>
+                <%= live_patch to: Routes.live_path(@socket, RecipeDetailLive, recipe.id) do %>
                   View
                 <% end %>
               </td>

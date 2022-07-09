@@ -5,20 +5,21 @@ defmodule MarleySpoonRecipe.Recipe do
     |> http_request
     |> Map.get("items")
     |> Enum.filter(fn item -> get_in(item, ["sys", "contentType", "sys", "id"]) == "recipe" end)
-    |> get_recipe_list_tuple
+    |> get_recipe_list_map
   end
 
-  def get_recipe_list_tuple(recipes) do
-    # Returns "id" of all recipes
-    ids = Enum.map(recipes, fn res -> get_in(res, ["sys","id"]) end)
-
-    # Returns "title" of all recipes
-    titles = Enum.map(recipes, fn res -> get_in(res, ["fields","title"]) end)
-
-    # fetches image of all recipes concurrently
-    images = get_recipes_image(recipes)
-
-    Enum.zip(titles, images) |> Enum.zip(ids)
+  def get_recipe_list_map(recipes) do
+    Enum.map(recipes, fn res ->
+      %{
+        id: get_in(res, ["sys","id"]),
+        title: get_in(res, ["fields","title"]),
+        photo: Task.async(fn -> link_type("Asset", get_in(res, ["fields","photo","sys","id"])) end)
+      }
+    end)
+    |> Enum.map(fn lt ->
+      photo = Task.await(lt.photo)
+      Map.put(lt, :photo, get_in(photo, ["fields", "file", "url"]))
+    end)
   end
 
   def get_recipe_detail(id) do
@@ -79,13 +80,6 @@ defmodule MarleySpoonRecipe.Recipe do
   defp get_record_by_link_type(linkType) when is_nil(linkType), do: linkType
 
   defp get_record_by_link_type(linkType) when is_binary(linkType), do: linkType
-
-  defp get_recipes_image(recipes) do
-    Enum.map(recipes, fn res -> get_in(res, ["fields","photo","sys","id"]) end)
-        |> Enum.map(fn(lt) -> Task.async(fn -> MarleySpoonRecipe.Recipe.link_type("Asset", lt) end) end)
-        |> Enum.map(&Task.await/1)
-        |> Enum.map(fn photo -> get_in(photo, ["fields", "file", "url"]) end)
-  end
 
   defp base_url(), do: "https://cdn.contentful.com"
   defp tail_url(), do: "access_token=7ac531648a1b5e1dab6c18b0979f822a5aad0fe5f1109829b8a197eb2be4b84c"
