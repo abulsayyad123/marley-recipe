@@ -1,7 +1,6 @@
 defmodule MarleySpoonRecipeWeb.RecipesLive do
   use MarleySpoonRecipeWeb, :live_view
   alias MarleySpoonRecipe.Recipe
-  alias MarleySpoonRecipeWeb.RecipeDetailLive
 
   def mount(_params, _session, socket) do
     recipes = Recipe.get_all_recipes()
