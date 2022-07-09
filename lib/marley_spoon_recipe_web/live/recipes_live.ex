@@ -10,7 +10,7 @@ defmodule MarleySpoonRecipeWeb.RecipesLive do
 
   def render(assigns) do
     ~H"""
-      Recipes
+      <h1>Recipes</h1>
       <table>
         <thead>
           <tr>
@@ -30,7 +30,7 @@ defmodule MarleySpoonRecipeWeb.RecipesLive do
               <td><%= recipe.title %></td>
               <td><img src={recipe.photo} /></td>
               <td>
-                <%= live_patch to: Routes.live_path(@socket, RecipeDetailLive, recipe.id) do %>
+                <%= live_patch to: Routes.recipe_detail_path(@socket, :index, recipe.id) do %>
                   View
                 <% end %>
               </td>

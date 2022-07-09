@@ -17,8 +17,8 @@ defmodule MarleySpoonRecipeWeb.Router do
   scope "/", MarleySpoonRecipeWeb do
     pipe_through :browser
 
-    live "/", RecipesLive
-    live "/recipe/:id", RecipeDetailLive
+    live "/", RecipesLive, :index
+    live "/recipe/:id", RecipeDetailLive, :index
   end
 
   # Other scopes may use custom stacks.

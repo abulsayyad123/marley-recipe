@@ -12,6 +12,10 @@ defmodule MarleySpoonRecipeWeb.RecipeDetailLive do
     ~H"""
       <h1> Recipe Detail </h1>
 
+      <%= live_patch to: Routes.recipes_path(@socket, :index)  do %>
+        <p style="font-size: 150%; cursor: pointer;">&larr;</p>
+      <% end %>
+
       <b> Title </b> <br>
       <%= @recipe.title %>
       <br>
