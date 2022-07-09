@@ -1,14 +1,28 @@
 defmodule MarleySpoonRecipe.Recipe do
+  alias MarleySpoonRecipe.ApiHelper
 
   def get_all_recipes() do
-    "#{base_url()}/spaces/#{space_id()}/environments/#{environment()}/entries?#{tail_url()}"
-    |> http_request
+    ApiHelper.all_records("entries")
     |> Map.get("items")
     |> Enum.filter(fn item -> get_in(item, ["sys", "contentType", "sys", "id"]) == "recipe" end)
     |> get_recipe_list_map
   end
 
-  def get_recipe_list_map(recipes) do
+  def get_recipe_detail(id) do
+    ApiHelper.get_single_record("entries", id)
+    |> get_nested_data
+  end
+
+  # Private
+  def link_type("Entry", id) do
+    ApiHelper.get_single_record("entries", id)
+  end
+
+  def link_type("Asset", id) do
+    ApiHelper.get_single_record("assets", id)
+  end
+
+  defp get_recipe_list_map(recipes) do
     Enum.map(recipes, fn res ->
       %{
         id: get_in(res, ["sys","id"]),
@@ -22,23 +36,6 @@ defmodule MarleySpoonRecipe.Recipe do
     end)
   end
 
-  def get_recipe_detail(id) do
-    "#{base_url()}/spaces/#{space_id()}/environments/#{environment()}/entries/#{id}?#{tail_url()}"
-    |> http_request
-    |> get_nested_data
-  end
-
-  def link_type("Entry", id) do
-    "#{base_url()}/spaces/#{space_id()}/environments/#{environment()}/entries/#{id}?#{tail_url()}"
-    |> http_request
-  end
-
-  def link_type("Asset", id) do
-    "#{base_url()}/spaces/#{space_id()}/environments/#{environment()}/assets/#{id}?#{tail_url()}"
-    |> http_request
-  end
-
-  # Private
   defp get_nested_data(recipe) do
     %{
       description: get_in(recipe, ["fields", "description"]),
@@ -50,17 +47,6 @@ defmodule MarleySpoonRecipe.Recipe do
     |> Enum.map(fn {k, lt} -> {k, Task.async(fn -> get_record_by_link_type(lt) end)} end)
     |> Enum.map(fn {k, lt} -> {k, Task.await(lt)} end)
     |> Enum.into(%{})
-  end
-
-  defp http_request(url) do
-    case HTTPoison.get(url) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        Jason.decode!(body)
-      {:ok, %HTTPoison.Response{status_code: 404}} ->
-        IO.puts "Result Not found"
-      {:error, %HTTPoison.Error{reason: reason}} ->
-        reason
-    end
   end
 
   defp get_record_by_link_type(linkType) when is_map(linkType) do
@@ -80,9 +66,4 @@ defmodule MarleySpoonRecipe.Recipe do
   defp get_record_by_link_type(linkType) when is_nil(linkType), do: linkType
 
   defp get_record_by_link_type(linkType) when is_binary(linkType), do: linkType
-
-  defp base_url(), do: "https://cdn.contentful.com"
-  defp tail_url(), do: "access_token=7ac531648a1b5e1dab6c18b0979f822a5aad0fe5f1109829b8a197eb2be4b84c"
-  defp space_id(), do: "kk2bw5ojx476"
-  defp environment(), do: "master"
 end
