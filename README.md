@@ -1,4 +1,16 @@
-# MarleySpoonRecipe
+# Marley Spoon Recipe
+
+As per challenge description I've added two pages.
+
+### Recipe List Page
+<img width="1435" alt="Screenshot 2022-07-09 at 5 34 04 PM" src="https://user-images.githubusercontent.com/37627094/178104868-2ae8336b-0f7f-4beb-810f-4a6df7bedef0.png">
+
+### Recipe Detail Page
+<img width="1435" alt="Screenshot 2022-07-09 at 5 34 31 PM" src="https://user-images.githubusercontent.com/37627094/178104883-0d6b603b-ae23-4a46-b289-27fece24f40c.png">
+
+### Scope of improvement
+- We can add mock api for testing using library like `Mox`.
+- Add components for list and detail views.
 
 To start your Phoenix server:
 
