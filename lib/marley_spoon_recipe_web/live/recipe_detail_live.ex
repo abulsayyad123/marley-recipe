@@ -15,13 +15,21 @@ defmodule MarleySpoonRecipeWeb.RecipeDetailLive do
       <b> Title </b> <br>
       <%= @recipe.title %>
       <br>
+      <br>
 
       <b> Description </b> <br>
       <%= raw(@recipe.description) %>
       <br>
+      <br>
+
+      <b> Chef </b> <br>
+      <%= @recipe.chef["fields"]["name"] %>
+      <br>
+      <br>
 
       <b> Photo </b> <br>
       <img src={@recipe.photo["fields"]["file"]["url"]} />
+      <br>
       <br>
 
       <b> Tags </b> <br>

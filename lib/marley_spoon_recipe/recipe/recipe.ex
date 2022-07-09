@@ -43,7 +43,8 @@ defmodule MarleySpoonRecipe.Recipe do
       description: get_in(recipe, ["fields", "description"]),
       title: get_in(recipe, ["fields", "title"]),
       photo: get_in(recipe, ["fields", "photo", "sys"]),
-      tags: get_in(recipe, ["fields", "tags"])
+      tags: get_in(recipe, ["fields", "tags"]),
+      chef: get_in(recipe, ["fields", "chef", "sys"])
     }
     |> Enum.map(fn {k, lt} -> {k, Task.async(fn -> get_record_by_link_type(lt) end)} end)
     |> Enum.map(fn {k, lt} -> {k, Task.await(lt)} end)
