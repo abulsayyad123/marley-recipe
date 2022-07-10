@@ -11,6 +11,7 @@ As per challenge description I've added two pages.
 ### Scope of improvement
 - We can add mock api for testing using library like `Mox`.
 - Add components for list and detail views.
+- From UX point of view i haven't handled nil data scenario on details page so we can improve that as well.
 
 To start your Phoenix server:
 
