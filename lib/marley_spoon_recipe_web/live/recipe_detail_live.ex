@@ -22,7 +22,7 @@ defmodule MarleySpoonRecipeWeb.RecipeDetailLive do
       <br>
 
       <b> Description </b> <br>
-      <%= raw(@recipe.description) %>
+      <%= raw(Earmark.as_html!(@recipe.description)) %>
       <br>
       <br>
 
