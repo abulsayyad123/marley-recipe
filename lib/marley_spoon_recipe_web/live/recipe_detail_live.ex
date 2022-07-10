@@ -17,17 +17,29 @@ defmodule MarleySpoonRecipeWeb.RecipeDetailLive do
       <% end %>
 
       <b> Title </b> <br>
-      <%= @recipe.title %>
+      <%= if @recipe.title do %>
+        <%= @recipe.title %>
+      <% else %>
+        No description
+      <% end %>
       <br>
       <br>
 
       <b> Description </b> <br>
-      <%= raw(Earmark.as_html!(@recipe.description)) %>
+      <%= if @recipe.description do %>
+        <%= raw(Earmark.as_html!(@recipe.description)) %>
+      <% else %>
+        No description
+      <% end %>
       <br>
       <br>
 
       <b> Chef </b> <br>
-      <%= @recipe.chef["fields"]["name"] %>
+      <%= if @recipe.chef["fields"]["name"] do %>
+        <%= @recipe.chef["fields"]["name"] %>
+      <% else %>
+        No Chef details
+      <% end %>
       <br>
       <br>
 
@@ -37,9 +49,12 @@ defmodule MarleySpoonRecipeWeb.RecipeDetailLive do
       <br>
 
       <b> Tags </b> <br>
-
-      <%= for tag <- @recipe.tags || [] do %>
-        <%= tag["fields"]["name"] %>,
+      <%= if length(@recipe.tags || []) > 0 do %>
+        <%= for tag <- @recipe.tags || [] do %>
+          <%= tag["fields"]["name"] %>,
+        <% end %>
+      <% else %>
+        No tags
       <% end %>
     """
   end

@@ -10,7 +10,7 @@ defmodule MarleySpoonRecipe.Recipe do
 
   def get_recipe_detail(id) do
     ApiHelper.get_single_record("entries", id)
-    |> get_nested_data
+    |> get_fields_record
   end
 
   # Private
@@ -36,7 +36,7 @@ defmodule MarleySpoonRecipe.Recipe do
     end)
   end
 
-  defp get_nested_data(recipe) do
+  defp get_fields_record(recipe) do
     %{
       description: get_in(recipe, ["fields", "description"]),
       title: get_in(recipe, ["fields", "title"]),
@@ -44,9 +44,8 @@ defmodule MarleySpoonRecipe.Recipe do
       tags: get_in(recipe, ["fields", "tags"]),
       chef: get_in(recipe, ["fields", "chef", "sys"])
     }
-    |> Enum.map(fn {k, lt} -> {k, Task.async(fn -> get_record_by_link_type(lt) end)} end)
-    |> Enum.map(fn {k, lt} -> {k, Task.await(lt)} end)
-    |> Enum.into(%{})
+    |> Map.new(fn {k, lt} -> {k, Task.async(fn -> get_record_by_link_type(lt) end)} end)
+    |> Map.new(fn {k, lt} -> {k, Task.await(lt)} end)
   end
 
   defp get_record_by_link_type(linkType) when is_map(linkType) do
