@@ -59,7 +59,7 @@ defmodule MarleySpoonRecipe.Recipe do
         link_type(lt["sys"]["linkType"], lt["sys"]["id"])
       end)
      end)
-    |> Enum.map(&Task.await/1)
+    |> Task.await_many
   end
 
   defp get_record_by_link_type(linkType) when is_nil(linkType), do: linkType
